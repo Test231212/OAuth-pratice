@@ -29,3 +29,7 @@ spring:
   sql:
     init:
       data-locations: classpath:db/data.sql
+  naver:
+    client_id: y2MhSc1ZRu0lA1Z5febE
+    redirect_uri: http://localhost8080/oauth/callback
+    client_secret: oGGVdeAdzq

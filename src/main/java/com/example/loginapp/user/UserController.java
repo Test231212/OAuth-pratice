@@ -17,7 +17,7 @@ public class UserController {
     @GetMapping("/oauth/callback")
     public String oauthCallback(String code) {
         System.out.println("콜백 : " + code);
-        User sessionUser = userService.카카오로그인(code);
+        User sessionUser = userService.네이버로그인(code);
         session.setAttribute("sessionUser", sessionUser);
         return "redirect:/shop";
     }

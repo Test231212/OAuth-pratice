@@ -113,4 +113,49 @@ public class UserService {
             return returnUser;
         }
     }
+
+    public User 네이버로그인(String code) {
+        RestTemplate rt = new RestTemplate();
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Content-type", "application/x-www-form-urlencoded;charset=utf-8");
+
+        MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
+        body.add("grant_type", "authorization_code");
+        body.add("client_id", "y2MhSc1ZRu0lA1Z5febE");
+        body.add("client_secret", "oGGVdeAdzq");
+        body.add("redirect_uri", "http://localhost:8080/oauth/callback");
+        body.add("code", code);
+
+        HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(body, headers);
+        ResponseEntity<NaverResponse.TokenDTO> response = rt.exchange(
+                "https://nid.naver.com/oauth2.0/token",
+                HttpMethod.POST,
+                request,
+                NaverResponse.TokenDTO.class);
+
+        HttpHeaders headers2 = new HttpHeaders();
+        headers2.add("Authorization", "Bearer " + response.getBody().getAccessToken());
+
+        HttpEntity<MultiValueMap<String, String>> request2 = new HttpEntity<>(headers2);
+        ResponseEntity<NaverResponse.NaverUserDTO> response2 = rt.exchange(
+                "https://openapi.naver.com/v1/nid/me",
+                HttpMethod.GET,
+                request2,
+                NaverResponse.NaverUserDTO.class);
+
+        String username = "naver_" + response2.getBody().getResponse().getId();
+        User userPS = userRepository.findByUsername(username);
+
+        if(userPS != null){
+            return userPS;
+        }else{
+            User user = User.builder()
+                    .username(username)
+                    .password(UUID.randomUUID().toString())
+                    .email(response2.getBody().getResponse().getEmail())
+                    .provider("naver")
+                    .build();
+            return userRepository.save(user);
+        }
+    }
 }
